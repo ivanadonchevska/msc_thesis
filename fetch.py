@@ -53,7 +53,7 @@ def scrape_full_text(url):
         r = requests.get(url, timeout=10, headers=HEADERS)
         soup = BeautifulSoup(r.text, "html.parser")
 
-        for tag in ["article", "main", ".article-body", ".content"]:
+        for tag in ["article", "main", ".article-content", ".article-body", ".content"]:
             content = soup.select_one(tag)
             if content:
                 return content.get_text(separator=" ", strip=True)
