@@ -1,9 +1,8 @@
 import os
 import json
 import feedparser
-import requests
 import hashlib
-from bs4 import BeautifulSoup
+import trafilatura
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
 
@@ -13,6 +12,8 @@ SITES = [
     {"name": "nova", "rss": "https://nova.bg/rss/latest"},
     {"name": "actualno", "rss": "https://www.actualno.com/rss"},
     {"name": "blitz", "rss": "https://blitz.bg/rss"},
+    {"name": "dnevnik", "rss": "https://www.dnevnik.bg/rss"},
+    {"name": "capital", "rss": "https://www.capital.bg/rss"},
 ]
 
 DATA_DIR = "data/raw"
@@ -50,28 +51,12 @@ HEADERS = {"User-Agent": "Mozilla/5.0 (compatible; NewsBot/1.0)"}
 
 def scrape_full_text(url):
     try:
-        r = requests.get(url, timeout=10, headers=HEADERS)
-        soup = BeautifulSoup(r.text, "html.parser")
-
-        for tag in ["article", "main", ".article-content", ".article-body", ".content"]:
-            content = soup.select_one(tag)
-            if content:
-                return content.get_text(separator=" ", strip=True)
-
-        paragraphs = soup.find_all("p")
-        return " ".join(p.get_text(strip=True) for p in paragraphs)
-
+        downloaded = trafilatura.fetch_url(url)
+        text = trafilatura.extract(downloaded)
+        return text if text else ""
     except Exception as e:
         print(f"Failed to scrape {url}: {e}")
         return ""
-
-
-def article_exists(article):
-    date_dir = article["published_at"][:10]
-    published_at = article["published_at"].replace(":", "-")
-    filename = f"{article['source']}__{published_at}.json"
-    filepath = os.path.join(DATA_DIR, date_dir, filename)
-    return os.path.exists(filepath)
 
 
 def make_filename(article):
@@ -79,6 +64,13 @@ def make_filename(article):
     published_at = article["published_at"].replace(":", "-")
     url_hash = hashlib.md5(article["url"].encode()).hexdigest()[:8]
     return f"{source}__{published_at}__{url_hash}.json"
+
+
+def article_exists(article):
+    date_dir = article["published_at"][:10]
+    filename = make_filename(article)
+    filepath = os.path.join(DATA_DIR, date_dir, filename)
+    return os.path.exists(filepath)
 
 
 def save_article(article):
@@ -99,12 +91,14 @@ def save_article(article):
 def fetch_site(site):
     articles = fetch_rss(site)
     saved = 0
-    for article in articles:
-        if article_exists(article):
-            continue
+    # for article in articles:
+    article = articles[0]
+    if article_exists(article):
+        print("exists")
+    else:
         article["full_text"] = scrape_full_text(article["url"])
         save_article(article)
-        saved += 1
+    # saved += 1
     print(f"{site['name']}: {saved} new articles saved\n")
 
 
