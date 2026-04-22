@@ -91,14 +91,12 @@ def save_article(article):
 def fetch_site(site):
     articles = fetch_rss(site)
     saved = 0
-    # for article in articles:
-    article = articles[0]
-    if article_exists(article):
-        print("exists")
-    else:
+    for article in articles:
+        if article_exists(article):
+            continue
         article["full_text"] = scrape_full_text(article["url"])
         save_article(article)
-    # saved += 1
+        saved += 1
     print(f"{site['name']}: {saved} new articles saved\n")
 
 
