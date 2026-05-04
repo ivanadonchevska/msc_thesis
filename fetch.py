@@ -11,6 +11,10 @@ SITES = [
     {"name": "24chasa", "rss": "https://24chasa.bg/rss"},
     {"name": "nova", "rss": "https://nova.bg/rss/latest"},
     {"name": "actualno", "rss": "https://www.actualno.com/rss"},
+    {"name": "economic", "rss": "https://www.economic.bg/rss.xml"},
+    {"name": "banker", "rss": "https://www.banker.bg/feed"},
+    {"name": "bta", "rss": "https://www.bta.bg/bg/rss/free"},
+    {"name": "pogled", "rss": "https://pogled.info/rss"},
 ]
 
 DATA_DIR = "data/raw"
