@@ -4,11 +4,12 @@ import re
 import pandas as pd
 from bs4 import BeautifulSoup
 
-
-# ── Predicates ────────────────────────────────────────────────────────────────
-
 _SOCIAL_ATTR = re.compile(r"\(@\w+\).*\b\d{4}\b")
 _EMOJI_RE = re.compile(r"[\U0001F000-\U0001FFFF\U00002600-\U000027BF]")
+_MEDIA_SUFFIX_RE = re.compile(
+    r"\(\s*(?:видео|снимка|снимки)" r"(?:\s*\+\s*(?:видео|снимка|снимки))?" r"\s*\)",
+    re.IGNORECASE,
+)
 
 
 def is_noise_line(line: str) -> bool:
@@ -26,9 +27,6 @@ def is_noise_line(line: str) -> bool:
     if content and not any("Ѐ" <= c <= "ӿ" for c in content):
         return True
     return False
-
-
-# ── Text-level cleaners ───────────────────────────────────────────────────────
 
 
 def drop_lines(text: str, predicate) -> str:
@@ -91,9 +89,6 @@ def fix_split_first_letter(text: str) -> str:
     return text
 
 
-# ── Global cleaners ───────────────────────────────────────────────────────────
-
-
 def strip_html(text: str) -> str:
     if not isinstance(text, str):
         return text
@@ -127,7 +122,10 @@ def remove_duplicate_paragraphs(text: str) -> str:
     return "\n\n".join(seen)
 
 
-# ── DataFrame applier ─────────────────────────────────────────────────────────
+def strip_media_suffixes(text: str) -> str:
+    if not isinstance(text, str):
+        return text
+    return _MEDIA_SUFFIX_RE.sub("", text).strip()
 
 
 def apply_to_source(df: pd.DataFrame, fn, source: str | None = None) -> pd.DataFrame:

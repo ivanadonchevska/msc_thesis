@@ -1,4 +1,6 @@
 import pandas as pd
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 
 COLLECTION_START = "2026-04-20"
 
@@ -87,4 +89,52 @@ def drop_by_field(
     print(f"Dropping {mask.sum()} articles where {field} {match} {patterns}")
     df = df[~mask].reset_index(drop=True)
     print(f"Remaining articles: {len(df)}")
+    return df
+
+
+def drop_near_duplicates(
+    df: pd.DataFrame,
+    threshold: float = 0.95,
+    window_days: int = 3,
+) -> pd.DataFrame:
+    df = df.copy()
+    df["_window"] = (
+        df["published_at_dt"].dt.tz_localize(None).dt.to_period(f"{window_days}D")
+    )
+
+    rows_to_drop = set()
+
+    for (source, window), group in df.groupby(["source", "_window"]):
+        if len(group) < 2:
+            continue
+
+        texts = (group["title"] + " " + group["full_text"].fillna("")).tolist()
+
+        try:
+            vectorizer = TfidfVectorizer(min_df=1, max_features=5000)
+            tfidf_matrix = vectorizer.fit_transform(texts)
+            sim_matrix = cosine_similarity(tfidf_matrix)
+        except ValueError:
+            continue
+
+        rows = group.reset_index()
+        n = len(rows)
+        for i in range(n):
+            for j in range(i + 1, n):
+                if sim_matrix[i, j] >= threshold:
+                    date_i = rows.iloc[i]["published_at_dt"]
+                    date_j = rows.iloc[j]["published_at_dt"]
+                    drop_idx = (
+                        rows.iloc[i]["index"]
+                        if date_i <= date_j
+                        else rows.iloc[j]["index"]
+                    )
+                    rows_to_drop.add(drop_idx)
+
+    df = df.drop(index=rows_to_drop).reset_index(drop=True)
+    df = df.drop(columns=["_window"])
+
+    print(
+        f"Dropped {len(rows_to_drop)} near-duplicate articles (threshold={threshold})"
+    )
     return df

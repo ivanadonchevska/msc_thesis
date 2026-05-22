@@ -17,6 +17,7 @@ from filters import (
     deduplicate,
     drop_mojibake,
     drop_short_articles,
+    drop_near_duplicates,
 )
 from source_cleaners import (
     clean_vesti,
@@ -75,6 +76,7 @@ def run_pipeline():
         df = drop_sources(df, sources=["capital", "blitz", "dnevnik"])
     df = drop_empty_full_text(df)
     df = deduplicate(df)
+    df = drop_near_duplicates(df)
     df = drop_mojibake(df)
     df = drop_short_articles(df, min_words=30)
 
@@ -92,6 +94,7 @@ def run_pipeline():
     # Global cleaning
     df = clean_global(df)
     df = drop_short_articles(df, min_words=30)
+    df = drop_near_duplicates(df)
 
     df = df.drop(columns=["summary", "published_at"])
 

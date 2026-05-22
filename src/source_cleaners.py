@@ -17,6 +17,7 @@ from cleaners import (
     remove_duplicate_paragraphs,
     decode_html_entities,
     strip_html,
+    strip_media_suffixes,
 )
 
 _CLOSE_PATTERN = re.compile(r"\sЗатвори\s+[А-Я]")
@@ -180,5 +181,7 @@ def clean_global(df: pd.DataFrame) -> pd.DataFrame:
     df["full_text"] = df["full_text"].apply(remove_duplicate_paragraphs)
     df["title"] = df["title"].apply(strip_html)
     df["title"] = df["title"].apply(decode_html_entities)
+    df["title"] = df["title"].apply(strip_media_suffixes)
+    df["full_text"] = df["full_text"].apply(strip_media_suffixes)
 
     return df
