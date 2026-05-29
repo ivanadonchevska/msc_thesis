@@ -14,6 +14,7 @@ SITES = [
     {"name": "economic", "rss": "https://www.economic.bg/rss.xml"},
     {"name": "banker", "rss": "https://www.banker.bg/feed"},
     {"name": "bta", "rss": "https://www.bta.bg/bg/rss/free"},
+    {"name": "pogled", "rss": "https://pogled.info/rss"},
     {"name": "segabg", "rss": "https://www.segabg.com/rss"},
     {"name": "standartnews", "rss": "https://www.standartnews.com/feed"},
     {"name": "monitor", "rss": "https://www.monitor.bg/rss"},
