@@ -48,6 +48,4 @@ jobs:
           git commit -m "chore: fetch RSS $(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
           git fetch origin main
-          git rebase origin/main
-
-          git push origin HEAD:main
+          git push --force-with-lease origin HEAD:main
