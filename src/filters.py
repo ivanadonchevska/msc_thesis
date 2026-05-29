@@ -71,6 +71,20 @@ def deduplicate(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+def filter_exact_duplicates(df: pd.DataFrame) -> pd.DataFrame:
+    before = len(df)
+    df = (
+        df.sort_values("published_at_dt", ascending=True)
+        .drop_duplicates(subset=["source", "full_text"], keep="first")
+        .reset_index(drop=True)
+    )
+    removed = before - len(df)
+    print(
+        f"Filtered exact duplicates (same source + full_text): {removed} ({removed / before * 100:.2f}%)"
+    )
+    return df
+
+
 def drop_by_field(
     df: pd.DataFrame,
     patterns: list[str] | str,
@@ -137,4 +151,47 @@ def drop_near_duplicates(
     print(
         f"Dropped {len(rows_to_drop)} near-duplicate articles (threshold={threshold})"
     )
+    return df
+
+
+def drop_updated_duplicates(
+    df: pd.DataFrame, sources: list[str], threshold: float = 0.7
+) -> pd.DataFrame:
+    df = df.sort_values("fetched_at", ascending=False).reset_index(drop=True)
+    rows_to_drop = set()
+
+    for source in sources:
+        source_df = df[df["source"] == source]
+        source_dropped = 0
+
+        for published_at, group in source_df.groupby("published_at_dt"):
+            if len(group) < 2:
+                continue
+
+            titles = group["title"].fillna("").tolist()
+            texts = group["full_text"].fillna("").tolist()
+
+            try:
+                title_sim = cosine_similarity(TfidfVectorizer().fit_transform(titles))[
+                    0
+                ][1]
+                text_sim = cosine_similarity(TfidfVectorizer().fit_transform(texts))[0][
+                    1
+                ]
+            except ValueError:
+                continue
+
+            if title_sim < threshold and text_sim < threshold:
+                continue
+
+            indices = group.index.tolist()
+            to_drop = indices[1:]
+            rows_to_drop.update(to_drop)
+            source_dropped += len(to_drop)
+
+        print(f"Source: {source} | Dropping: {source_dropped}")
+
+    before = len(df)
+    df = df.drop(index=rows_to_drop).reset_index(drop=True)
+    print(f"\nTotal dropped: {before - len(df)} | Remaining: {len(df)}")
     return df

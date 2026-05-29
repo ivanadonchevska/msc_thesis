@@ -18,6 +18,8 @@ from filters import (
     drop_mojibake,
     drop_short_articles,
     drop_near_duplicates,
+    filter_exact_duplicates,
+    drop_updated_duplicates,
 )
 from source_cleaners import (
     clean_vesti,
@@ -95,6 +97,10 @@ def run_pipeline():
     df = clean_global(df)
     df = drop_short_articles(df, min_words=30)
     df = drop_near_duplicates(df)
+    df = filter_exact_duplicates(df)
+    df = drop_updated_duplicates(
+        df, sources=["segabg", "bta", "vesti", "nova", "actualno"]
+    )
 
     df = df.drop(columns=["summary", "published_at"])
 

@@ -128,6 +128,22 @@ def strip_media_suffixes(text: str) -> str:
     return _MEDIA_SUFFIX_RE.sub("", text).strip()
 
 
+def filter_noise_articles(df: pd.DataFrame) -> pd.DataFrame:
+    patterns = [
+        r"^Спортът по ТВ",
+        r"^Гледайте",
+        r"^Най-важните новини за деня",
+        r"^Обяви за",
+        r"Резултати и класиране",
+    ]
+    mask = df["title"].str.contains(
+        "|".join(patterns), case=False, na=False, regex=True
+    )
+    removed = mask.sum()
+    print(f"Filtered noise articles: {removed} ({removed / len(df) * 100:.2f}%)")
+    return df[~mask].reset_index(drop=True)
+
+
 def apply_to_source(df: pd.DataFrame, fn, source: str | None = None) -> pd.DataFrame:
     if source:
         mask = df["source"] == source
