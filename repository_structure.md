@@ -12,7 +12,8 @@ msc_thesis/
 │
 ├── notebooks/
 │   ├── 01_data_exploration.ipynb     # exploratory analysis of raw data
-│   └── 02_data_cleaning.ipynb        # cleaning analysis & pipeline decisions
+│   ├── 02_data_cleaning.ipynb        # cleaning analysis & pipeline decisions
+│   └── 03_cleaning_with_llm.ipynb    # experiment: BgGPT-based cleaning vs rule-based pipeline
 │
 ├── src/
 │   ├── pipeline.py                   # ETL orchestrator
@@ -25,9 +26,11 @@ msc_thesis/
     ├── raw/
     │   └── {date}/
     │       └── {source}__{date}__{hash}.json   # raw articles organised by date
-    └── processed/
-        ├── articles_clean.parquet    # final cleaned dataset
-        └── seen_urls.txt             # incremental processing tracker
+    ├── processed/
+    │   ├── articles_clean.parquet    # final cleaned dataset
+    │   └── seen_urls.txt             # incremental processing tracker
+    └── experiments/
+        └── bggpt_cleaning_experiment.parquet  # LLM cleaning experiment results (300 articles)
 ```
 
 ---
@@ -47,6 +50,7 @@ flowchart LR
         subgraph NB["notebooks/"]
             NB1["01_data_exploration.ipynb\nexploratory analysis of raw data"]
             NB2["02_data_cleaning.ipynb\ncleaning analysis & pipeline decisions"]
+            NB3["03_cleaning_with_llm.ipynb\nBgGPT cleaning experiment"]
         end
 
         subgraph SRC["src/"]
@@ -65,6 +69,9 @@ flowchart LR
                 PARQ["articles_clean.parquet\nfinal cleaned dataset"]
                 SEEN["seen_urls.txt\nincremental processing tracker"]
             end
+            subgraph EXP["experiments/"]
+                EXPF["bggpt_cleaning_experiment.parquet\nLLM cleaning experiment results"]
+            end
         end
     end
 
@@ -73,6 +80,10 @@ flowchart LR
     RAWF --> NB1
     NB1 --> NB2
     NB2 -- "informs pipeline decisions" --> SRC
+    NB2 --> NB3
+    PARQ --> NB3
+    RAWF --> NB3
+    NB3 --> EXPF
     RAWF --> LOAD
     LOAD --> PIPE
     FILT --> PIPE
