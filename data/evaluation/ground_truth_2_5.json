@@ -1,0 +1,65 @@
+{
+  "17716": {
+    "bucket": "2-5",
+    "articles": [
+      "https://www.24chasa.bg/mezhdunarodni/article/22887086",
+      "https://fakti.bg/world/1055698-govori-moskva-politicite-ot-baltiiskite-darjavi-poddarjat-maniakalno-antiruski-pozicii"
+    ],
+    "labels": [
+      0,
+      0
+    ]
+  },
+  "9785": {
+    "bucket": "2-5",
+    "articles": [
+      "https://www.bta.bg/bg/news/world/1120268-dzhordzha-meloni-shte-se-sreshtne-v-rim-s-novoizbraniya-ungarski-premier-madyar",
+      "https://fakti.bg/world/1052734-meloni-priema-novia-ungarski-premier-peter-madar-v-rim",
+      "https://nova.bg/news/view/2026/05/07/536416/%D0%BF%D0%B5%D1%82%D0%B5%D1%80-%D0%BC%D0%B0%D0%B4%D1%8F%D1%80-%D1%81%D0%B5-%D1%81%D1%80%D0%B5%D1%89%D0%BD%D0%B0-%D1%81-%D0%B4%D0%B6%D0%BE%D1%80%D0%B4%D0%B6%D0%B0-%D0%BC%D0%B5%D0%BB%D0%BE%D0%BD%D0%B8/",
+      "https://www.vesti.bg/sviat/nova-era-v-budapeshta-madiar-nacherta-bydeshteto-na-ungariia-pred-meloni-6259000",
+      "https://www.standartnews.com/svyat/nova-era-v-ungariya-madyar-gotvi-reshitelni-merki-632841.html"
+    ],
+    "labels": [
+      0,
+      0,
+      1,
+      1,
+      1
+    ]
+  },
+  "2810": {
+    "bucket": "2-5",
+    "articles": [
+      "https://www.24chasa.bg/bulgaria/article/22728370",
+      "https://www.actualno.com/society/pari-ili-bezhaberie-parad-na-gergiovden-njama-da-ima-news_2586469.html",
+      "https://www.segabg.com/hot/category-bulgaria/gergovden-e-bez-parad-zaradi-udulzhitelniya-byudzhet"
+    ],
+    "labels": [
+      0,
+      1,
+      2
+    ]
+  },
+  "265": {
+    "bucket": "2-5",
+    "articles": [
+      "https://fakti.bg/world/1050340-meloni-naprejenieto-mejdu-sasht-i-ispania-vredi-na-nato",
+      "https://www.24chasa.bg/mezhdunarodni/article/22728053"
+    ],
+    "labels": [
+      0,
+      0
+    ]
+  },
+  "15864": {
+    "bucket": "2-5",
+    "articles": [
+      "https://www.actualno.com/society/jasni-sa-nomerata-v-buletinite-za-chastichnite-izbori-na-14-uni-news_2594630.html",
+      "https://www.vesti.bg/bulgaria/cik-opredeli-nomerata-v-biuletinite-za-chastichnite-izbori-na-14-iuni-6259705"
+    ],
+    "labels": [
+      0,
+      0
+    ]
+  }
+}
