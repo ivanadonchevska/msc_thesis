@@ -1,11 +1,3 @@
-"""
-dot_detector.py
-
-Detects dots (sub-events) within each story using Louvain community detection.
-Edges are weighted by cosine similarity * time decay. Articles too far apart
-in time are not connected. Stories with no edges fall back to one dot per article.
-"""
-
 import os
 import pickle
 from collections import defaultdict
@@ -86,14 +78,16 @@ def detect_dots(
         dot_list = []
         for idx in story_articles:
             pub = df.iloc[idx]["published_at_dt"]
-            dot_list.append({
-                "indices": [idx],
-                "start": pub,
-                "end": pub,
-                "effective_start": _effective_time(idx, df),
-                "size": 1,
-                "sources": [df.iloc[idx]["source"]],
-            })
+            dot_list.append(
+                {
+                    "indices": [idx],
+                    "start": pub,
+                    "end": pub,
+                    "effective_start": _effective_time(idx, df),
+                    "size": 1,
+                    "sources": [df.iloc[idx]["source"]],
+                }
+            )
         return sorted(dot_list, key=lambda x: x["effective_start"])
 
     partition = community_louvain.best_partition(G, random_state=random_seed)
@@ -105,14 +99,16 @@ def detect_dots(
     for indices in clusters.values():
         dot_dates = [df.iloc[i]["published_at_dt"] for i in indices]
         eff_times = [_effective_time(i, df) for i in indices]
-        dot_list.append({
-            "indices": indices,
-            "start": min(dot_dates),
-            "end": max(dot_dates),
-            "effective_start": min(eff_times),
-            "size": len(indices),
-            "sources": df.iloc[indices]["source"].tolist(),
-        })
+        dot_list.append(
+            {
+                "indices": indices,
+                "start": min(dot_dates),
+                "end": max(dot_dates),
+                "effective_start": min(eff_times),
+                "size": len(indices),
+                "sources": df.iloc[indices]["source"].tolist(),
+            }
+        )
 
     dot_list.sort(key=lambda x: x["effective_start"])
     return dot_list
@@ -137,7 +133,9 @@ def run_dot_detector():
         all_dots[sid] = detect_dots(arts, df, emb_idx)
 
     total_dots = sum(len(dots) for dots in all_dots.values())
-    print(f"Total dots: {total_dots:,}  ({total_dots / len(all_dots):.1f} avg per story)")
+    print(
+        f"Total dots: {total_dots:,}  ({total_dots / len(all_dots):.1f} avg per story)"
+    )
 
     os.makedirs(os.path.dirname(DOTS_PATH), exist_ok=True)
     with open(DOTS_PATH, "wb") as f:

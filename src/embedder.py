@@ -1,11 +1,3 @@
-"""
-embedder.py
-
-Incremental article embedding using BAAI/bge-m3.
-Text variant: title + lead (first 3 sentences of full_text).
-Only embeds articles not yet in embeddings.npy, then appends.
-"""
-
 import os
 import re
 

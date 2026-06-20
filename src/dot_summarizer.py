@@ -33,7 +33,7 @@ def _build_prompt(dot: dict, df: pd.DataFrame) -> str:
     titles = "\n".join([f"- {df.iloc[i]['title']}" for i in dot["indices"]])
     return (
         "Ти си редактор на новинарски сайт. По-долу са заглавията на няколко новини "
-        "за едно и също събитие, публикувани в един и същи ден от различни източници. "
+        "за едно и също събитие от различни източници. "
         "Напиши 1-2 изречения на български, които обобщават какво се е случило. "
         "Бъди конкретен — включи имена, места и действия. "
         "Не добавяй въведение или обяснение, само резюмето.\n\n"
@@ -67,24 +67,39 @@ def run_dot_summarizer():
         summaries = {}
 
     total_dots = sum(len(dots) for dots in all_dots.values())
-    multi_dots = [
+
+    # fill singletons instantly (title only, no LLM)
+    singletons_added = 0
+    for sid, dots in all_dots.items():
+        for idx, dot in enumerate(dots):
+            if dot["size"] == 1 and (sid, idx) not in summaries:
+                summaries[(sid, idx)] = df.iloc[dot["indices"][0]]["title"]
+                singletons_added += 1
+    if singletons_added:
+        os.makedirs(os.path.dirname(SUMMARIES_PATH), exist_ok=True)
+        with open(SUMMARIES_PATH, "wb") as f:
+            pickle.dump(summaries, f)
+        print(f"Added {singletons_added:,} singleton titles.")
+
+    # only LLM dots remain
+    llm_dots = [
         (sid, idx, dot)
         for sid, dots in all_dots.items()
         for idx, dot in enumerate(dots)
-        if (sid, idx) not in summaries
+        if dot["size"] > 1 and (sid, idx) not in summaries
     ]
 
-    print(f"Total dots: {total_dots:,} | Remaining: {len(multi_dots):,}")
+    print(f"Total dots: {total_dots:,} | LLM remaining: {len(llm_dots):,}")
 
     os.makedirs(os.path.dirname(SUMMARIES_PATH), exist_ok=True)
 
-    for i, (sid, idx, dot) in enumerate(multi_dots):
+    for i, (sid, idx, dot) in enumerate(llm_dots):
         summaries[(sid, idx)] = _summarize(dot, df)
 
         if (i + 1) % CHECKPOINT_EVERY == 0:
             with open(SUMMARIES_PATH, "wb") as f:
                 pickle.dump(summaries, f)
-            print(f"  [{i+1}/{len(multi_dots)}] checkpoint saved")
+            print(f"  [{i+1}/{len(llm_dots)}] checkpoint saved")
 
     with open(SUMMARIES_PATH, "wb") as f:
         pickle.dump(summaries, f)
